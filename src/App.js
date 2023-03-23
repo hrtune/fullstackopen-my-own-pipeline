@@ -1,100 +1,26 @@
-import React from "react"
-import { useState, useEffect } from "react";
-import services from "./services/phonebook"
+import React from 'react'
+import { useState, useEffect } from 'react'
+import services from './services/phonebook'
 import './App.css'
-import PropTypes from 'prop-types'
-
-const Input = ({text, value, onChange}) => (
-  <div>
-    {text}: <input value={value} onChange={onChange} />
-  </div>
-)
-Input.propTypes = {
-  text: PropTypes.string,
-  value: PropTypes.string,
-  onChange: PropTypes.func
-}
-
-const Person = ({name, number, deletePerson}) => (
-  <div>
-    <p>{name} {number} <button onClick={deletePerson}>delete</button></p>
-  </div>
-)
-Person.propTypes = {
-  name: PropTypes.string,
-  number: PropTypes.string,
-  deletePerson: PropTypes.func
-}
-
-const Persons = ({persons, deletePerson}) => {
-  return (
-    persons.map((person) => <Person key={person.id} name={person.name} number={person.number} deletePerson={() => deletePerson(person)}/>)
-  )
-}
-
-const Header = ({text}) => (
-  <>
-    <h2>{text}</h2>
-  </>
-)
-Header.propTypes = {
-  text: PropTypes.string
-}
-
-const Button = ({type, text}) => (
-  <>
-    <button type={type}>{text}</button>
-  </>
-)
-Button.propTypes = {
-  type: PropTypes.string,
-  text: PropTypes.string
-}
-
-const Form = ({onSubmit, inputs, button}) => {
-  return(
-    <div>
-      <form onSubmit={onSubmit}>
-        {inputs.map((input) => <Input key={input.text} text={input.text} value={input.value} onChange={input.onChange} />)}
-        <Button type={button.type} text={button.text} />
-      </form>
-    </div>
-  )
-}
-Form.propTypes = {
-  onSubmit: PropTypes.func,
-  inputs: PropTypes.array,
-  button: PropTypes.object
-}
-
-const Notification = ({notification}) => {
-  if (!notification) {
-    return
-  }
-
-  return (
-    <div className={notification.state}>
-      {notification.message}
-    </div>
-  )
-}
-Notification.propTypes = {
-  notification: PropTypes.object
-}
+import Header from './components/Header'
+import Input from './components/Input'
+import Persons from './components/Persons'
+import Notification from './components/Notification'
+import Form from './components/Form'
 
 const App = () => {
-  const [persons, setPersons] = useState([]);
-  const [newName, setNewName] = useState("");
-  const [newNumber, setNewNumber] = useState("");
-  const [filter, setFilter] = useState("");
-  const [notification, setNotification] = useState(null);
+  const [persons, setPersons] = useState([])
+  const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
+  const [filter, setFilter] = useState('')
+  const [notification, setNotification] = useState(null)
 
   useEffect(() => {
-    console.log("effect!");
+    console.log('effect!')
     services.getAll()
       .then(response => {
-        console.log(response.data);
-        setPersons(response.data);
+        console.log(response.data)
+        setPersons(response.data)
       })
   }, [])
 
@@ -109,7 +35,7 @@ const App = () => {
       if (!window.confirm(`${target.name} is alraedy added to phonebook, replace the old number with the new one?`)) {
         return
       }
-      const newPerson = {...target, number: newNumber}
+      const newPerson = { ...target, number: newNumber }
       services.update(newPerson, newPerson.id)
         .then(response => {
           setPersons(persons.map(p => p.id !== newPerson.id ? p : newPerson))
@@ -117,8 +43,8 @@ const App = () => {
             message: `Updated ${response.data.name}`,
             state: 'success'
           })
-          setNewName("")
-          setNewNumber("")
+          setNewName('')
+          setNewNumber('')
         })
         .catch(error => {
           if (error.response.status === 404) {
@@ -126,9 +52,9 @@ const App = () => {
               message: `Information of ${newPerson.name} has already been removed from server`,
               state: 'error'
             })
-            
+
             setPersons(persons.filter((p) => p.id !== newPerson.id))
-          } else if (error.response.data.errorName === "ValidationError") {
+          } else if (error.response.data.errorName === 'ValidationError') {
             setNotification({
               message: error.response.data.error,
               state: 'error'
@@ -144,21 +70,21 @@ const App = () => {
 
     services.create(personObject)
       .then(response => {
-        console.log(`add id:${response.data.id} to server`);
+        console.log(`add id:${response.data.id} to server`)
         setPersons(persons.concat(response.data))
         setNotification({
           message: `Added ${response.data.name}`,
           state: 'success'
         })
         setTimeout(() => {setNotification(null)}, 3000)
-        setNewName("")
-        setNewNumber("")
+        setNewName('')
+        setNewNumber('')
       })
       .catch(error => {
-        if (error.response.data.errorName === "ValidationError") {
+        if (error.response.data.errorName === 'ValidationError') {
           setNotification({
-              message: error.response.data.error,
-              state: 'error'
+            message: error.response.data.error,
+            state: 'error'
           })
         }
       })
@@ -189,7 +115,7 @@ const App = () => {
     if (!(window.confirm(`Delete ${person.name} ?`))) {
       return
     }
-    
+
     services.remove(id)
       .then(() => {
         setPersons(persons.filter(p => id !== p.id))
@@ -198,17 +124,17 @@ const App = () => {
 
   const inputs = [
     {
-      text: "name",
+      text: 'name',
       value: newName,
       onChange: handleNameChange
     },
     {
-      text: "number",
+      text: 'number',
       value: newNumber,
       onChange: handleNumberChange
     }
   ]
-  
+
 
   return (
     <div>
@@ -216,11 +142,11 @@ const App = () => {
       <Notification notification={notification} />
       <Input text="filter shown with" value={filter} onChange={handleFilter} />
       <Header text="add a new" />
-      <Form onSubmit={addPerson} inputs={inputs} button={{type:"submit", text: "add"}} />
+      <Form onSubmit={addPerson} inputs={inputs} button={{ type:'submit', text: 'add' }} />
       <Header text="Numbers" />
       <Persons persons={filteredPersons()} deletePerson={deletePerson} />
     </div>
-  );
-};
+  )
+}
 
-export default App;
+export default App
