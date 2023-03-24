@@ -52,6 +52,9 @@ const nameInPersons = (name) => {
   return persons.find(p => p.name === name) || false
 }
 
+app.get('/hello', (request, response) => {
+  response.send('Hello!')
+})
 
 app.get('/api/persons', (request, response) => {
   response.json(persons)
